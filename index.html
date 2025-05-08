@@ -1179,7 +1179,7 @@
         // helper: exactly the same logic you use in handleTriggerCall to send one call
         async function sendCall(callData) {
             try {
-                const res = await axios.post('https://a7b0-157-49-97-150.ngrok-free.app/trigger-call', callData);
+                const res = await axios.post('https://ivrbot.onrender.com/trigger-call', callData);
                 showToast(`Call queued for ${callData.phone}`, 'success');
                 return res.data.sid;
             } catch (err) {
@@ -1262,7 +1262,7 @@
 
             // In a real app, you would make an API call here
             // For demo, we'll simulate a successful call
-            axios.post('https://a7b0-157-49-97-150.ngrok-free.app/trigger-call', callData)
+            axios.post('https://ivrbot.onrender.com/trigger-call', callData)
                 .then(response => {
                     showToast('Call has been queued successfully', 'success');
                     elements.triggerCallForm.reset();
@@ -1321,7 +1321,7 @@
             const reportType = document.getElementById('report-type').value;
 
             try {
-                const res = await fetch('https://a7b0-157-49-97-150.ngrok-free.app/generate-report', {
+                const res = await fetch('https://ivrbot.onrender.com/generate-report', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ startDate, endDate, reportType })
@@ -1770,7 +1770,7 @@
         }
 
         function loadDashboardStats() {
-            axios.get('https://a7b0-157-49-97-150.ngrok-free.app/call-stats')
+            axios.get('https://ivrbot.onrender.com/call-stats')
                 .then(response => {
                     const stats = response.data;
                     document.getElementById('stat-total-calls').textContent = stats.today || 0;
@@ -1875,7 +1875,7 @@
 
 
         function loadRecentActivity() {
-            axios.get('https://a7b0-157-49-97-150.ngrok-free.app/recent-activity')
+            axios.get('https://ivrbot.onrender.com/recent-activity')
                 .then(res => {
                     const activityList = document.getElementById('recent-activity');
                     activityList.innerHTML = '';
@@ -1922,7 +1922,7 @@
             const startDate = document.getElementById('report-start-date').value;
             const endDate = document.getElementById('report-end-date').value;
             try {
-                const res = await fetch('https://a7b0-157-49-97-150.ngrok-free.app/download-recordings', {
+                const res = await fetch('https://ivrbot.onrender.com/download-recordings', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ startDate, endDate })
@@ -1999,7 +1999,7 @@
             const endDate = document.getElementById('report-end-date').value;
 
             try {
-                const res = await fetch('https://a7b0-157-49-97-150.ngrok-free.app/download-transcript', {
+                const res = await fetch('https://ivrbot.onrender.com/download-transcript', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ startDate, endDate })
@@ -2047,7 +2047,7 @@
 
 
         function loadRecentActivity() {
-            axios.get('https://a7b0-157-49-97-150.ngrok-free.app/recent-activity')
+            axios.get('https://ivrbot.onrender.com/recent-activity')
                 .then(res => {
                     const activityList = document.getElementById('recent-activity');
                     activityList.innerHTML = '';
@@ -2094,7 +2094,7 @@
             const startDate = document.getElementById('report-start-date').value;
             const endDate = document.getElementById('report-end-date').value;
             try {
-                const res = await fetch('https://a7b0-157-49-97-150.ngrok-free.app/download-recordings', {
+                const res = await fetch('https://ivrbot.onrender.com/download-recordings', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ startDate, endDate })
@@ -2171,7 +2171,7 @@
             const endDate = document.getElementById('report-end-date').value;
 
             try {
-                const res = await fetch('https://a7b0-157-49-97-150.ngrok-free.app/download-transcript', {
+                const res = await fetch('https://ivrbot.onrender.com/download-transcript', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ startDate, endDate })
@@ -2225,7 +2225,7 @@
 
 
         function loadCallHistory() {
-            fetch('https://a7b0-157-49-97-150.ngrok-free.app/call-history')
+            fetch('https://ivrbot.onrender.com/call-history')
                 .then(resp => resp.json())
                 .then(calls => {
                     console.log("📞 call_log:", calls);           // <-- prints to browser console
