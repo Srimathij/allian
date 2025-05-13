@@ -305,10 +305,10 @@
                         </a>
                     </li>
                     <li>
-                        <!-- <a href="#" data-page="analytics" class="flex items-center p-3 rounded-xl nav-link">
+                        <a href="#" data-page="analytics" class="flex items-center p-3 rounded-xl nav-link">
                             <i class="fas fa-chart-pie mr-3 text-indigo-500"></i>
                             <span>Analytics</span>
-                        </a> -->
+                        </a>
                     </li>
                     <li>
                         <a href="#" data-page="logs" class="flex items-center p-3 rounded-xl nav-link">
@@ -722,7 +722,7 @@
                     </div>
                 </div>
 
-                <!-- Analytics Page
+                <!-- Analytics Page -->
                 <div id="analytics-page" class="page-content hidden">
                     <div class="light-card rounded-2xl p-6">
                         <h2 class="text-xl font-semibold text-slate-800 mb-6">Analytics Dashboard</h2>
@@ -747,7 +747,7 @@
                             </div>
                         </div>
                     </div>
-                </div> -->
+                </div> 
 
                 <!-- Logs Page -->
                 <div id="logs-page" class="page-content hidden">
@@ -954,7 +954,7 @@
                 'trigger-call': document.getElementById('trigger-call-page'),
                 'call-history': document.getElementById('call-history-page'),
                 reports: document.getElementById('reports-page'),
-                // analytics: document.getElementById('analytics-page'),
+                analytics: document.getElementById('analytics-page'),
                 logs: document.getElementById('logs-page'),
                 settings: document.getElementById('settings-page')
             },
@@ -1138,7 +1138,7 @@
                 'trigger-call': 'Trigger Call',
                 'call-history': 'Call History',
                 reports: 'Reports',
-                // analytics: 'Analytics',
+                analytics: 'Analytics',
                 logs: 'System Logs',
                 settings: 'Account Settings'
             };
@@ -1263,6 +1263,7 @@
             // In a real app, you would make an API call here
             // For demo, we'll simulate a successful call
             axios.post('https://ivrbot.onrender.com/trigger-call', callData)
+            
                 .then(response => {
                     showToast('Call has been queued successfully', 'success');
                     elements.triggerCallForm.reset();
@@ -1283,20 +1284,30 @@
 
                     // poll every 5s until Twilio updates our status
                     const poller = setInterval(() => {
-                        axios.get('https://b417-103-118-172-2.ngrok-free.app/call-history')
+                        axios.get('https://ivrbot.onrender.com/call-history')
                             .then(res => {
-                                // replace local callHistory with the backend’s truth
-                                state.callHistory = res.data;
-                                if (state.currentPage === 'call-history') renderCallHistory();
+                                const newData = res.data;
 
-                                // once we see “completed” for our SID, stop polling
-                                const me = state.callHistory.find(c => c.sid === sid);
-                                if (me && me.status === 'completed') {
-                                    clearInterval(poller);
-                                    loadDashboardStats();
-                                    loadRecentActivity();
+                                // Optional: validate it's actually an array with items
+                                if (Array.isArray(newData) && newData.length > 0) {
+                                    state.callHistory = newData;
+
+                                    if (state.currentPage === 'call-history') {
+                                        renderCallHistory();
+                                    }
+
+                                    const me = state.callHistory.find(c => c.sid === sid);
+                                    if (me && me.status === 'completed') {
+                                        clearInterval(poller);
+                                        loadDashboardStats();
+                                        loadRecentActivity();
+                                        showToast('Call completed successfully', 'success');
+                                    }
+                                } else {
+                                    console.warn('Empty or invalid call history received, skipping update');
                                 }
                             })
+
                             .catch(err => {
                                 console.error('poll error', err);
                                 clearInterval(poller);
@@ -1308,7 +1319,13 @@
                     console.error('Call trigger failed:', error);
                     showToast('Failed to trigger call', 'error');
                 });
+                
         }
+
+        setInterval(() => {
+            console.log("Call History Length:", state.callHistory.length);
+        }, 2000);
+
 
 
 
@@ -1862,7 +1879,10 @@
                 .then(res => {
                     const resultText = `✅ Calls Triggered: ${res.triggered}\n❌ Failed: ${res.errors?.length || 0}`;
                     alert(resultText);
+                    loadDashboardStats();
+                    loadRecentActivity();
                 })
+                
                 .catch(err => {
                     console.error(err);
                     alert("✅Success,Calls Triggered");
@@ -1874,47 +1894,47 @@
         });
 
 
-        function loadRecentActivity() {
-            axios.get('https://ivrbot.onrender.com/recent-activity')
-                .then(res => {
-                    const activityList = document.getElementById('recent-activity');
-                    activityList.innerHTML = '';
+        // function loadRecentActivity() {
+        //     axios.get('https://ivrbot.onrender.com/recent-activity')
+        //         .then(res => {
+        //             const activityList = document.getElementById('recent-activity');
+        //             activityList.innerHTML = '';
 
-                    res.data.forEach(call => {
-                        const li = document.createElement('div');
-                        li.className = 'flex items-start';
+        //             res.data.forEach(call => {
+        //                 const li = document.createElement('div');
+        //                 li.className = 'flex items-start';
 
-                        let bgClass = '';
-                        let iconClass = '';
+        //                 let bgClass = '';
+        //                 let iconClass = '';
 
-                        if (call.status === 'queued') {
-                            bgClass = 'bg-indigo-100';
-                            iconClass = 'fas fa-phone-alt text-indigo-600';
-                        } else if (call.status === 'completed') {
-                            bgClass = 'bg-green-100';
-                            iconClass = 'fas fa-check-circle text-green-600';
-                        } else if (call.status === 'failed') {
-                            bgClass = 'bg-yellow-100';
-                            iconClass = 'fas fa-exclamation-triangle text-yellow-600';
-                        }
+        //                 if (call.status === 'queued') {
+        //                     bgClass = 'bg-indigo-100';
+        //                     iconClass = 'fas fa-phone-alt text-indigo-600';
+        //                 } else if (call.status === 'completed') {
+        //                     bgClass = 'bg-green-100';
+        //                     iconClass = 'fas fa-check-circle text-green-600';
+        //                 } else if (call.status === 'failed') {
+        //                     bgClass = 'bg-yellow-100';
+        //                     iconClass = 'fas fa-exclamation-triangle text-yellow-600';
+        //                 }
 
-                        const relativeTime = timeAgo(new Date(call.timestamp));
-                        const statusText = `Call ${call.status} to ${call.phone}`;
+        //                 const relativeTime = timeAgo(new Date(call.timestamp));
+        //                 const statusText = `Call ${call.status} to ${call.phone}`;
 
-                        li.innerHTML = `
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <div class="${bgClass} p-2 rounded-full mr-3">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <i class="${iconClass} text-sm"></i>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    <p class="text-sm font-medium text-slate-800">${statusText}</p>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <p class="text-xs text-slate-500">${relativeTime}</p>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </div>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            `;
-                        activityList.appendChild(li);
-                    });
-                })
-                .catch(err => console.error('Failed to load activity:', err));
-        }
+        //                 li.innerHTML = `
+        //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     <div class="${bgClass} p-2 rounded-full mr-3">
+        //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 <i class="${iconClass} text-sm"></i>
+        //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         </div>
+        //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 <div>
+        //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             <p class="text-sm font-medium text-slate-800">${statusText}</p>
+        //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         <p class="text-xs text-slate-500">${relativeTime}</p>
+        //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 </div>
+        //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     `;
+        //                 activityList.appendChild(li);
+        //             });
+        //         })
+        //         .catch(err => console.error('Failed to load activity:', err));
+        // }
 
 
         async function handleDownloadRecordings() {
@@ -2069,8 +2089,9 @@
                             bgClass = 'bg-yellow-100';
                             iconClass = 'fas fa-exclamation-triangle text-yellow-600';
                         }
+                        const relativeTime = timeAgo(new Date(Date.parse(call.timestamp)));
 
-                        const relativeTime = timeAgo(new Date(call.timestamp));
+
                         const statusText = `Call ${call.status} to ${call.phone}`;
 
                         li.innerHTML = `
